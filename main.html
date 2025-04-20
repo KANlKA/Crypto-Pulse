@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Pulse | Real-Time Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+        
+        .coin-card {
+            transition: all 0.3s ease;
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .coin-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            border-color: rgba(74, 222, 128, 0.3);
+        }
+        
+        .price-up {
+            animation: pulseGreen 1.5s infinite;
+        }
+        
+        .price-down {
+            animation: pulseRed 1.5s infinite;
+        }
+        
+        @keyframes pulseGreen {
+            0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(74, 222, 128, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+        }
+        
+        @keyframes pulseRed {
+            0% { box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(248, 113, 113, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(248, 113, 113, 0); }
+        }
+        
+        .market-table {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(74, 222, 128, 0.5) transparent;
+        }
+        
+        .market-table::-webkit-scrollbar {
+            height: 6px;
+        }
+        
+        .market-table::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .market-table::-webkit-scrollbar-thumb {
+            background-color: rgba(74, 222, 128, 0.5);
+            border-radius: 20px;
+        }
+        
+        .glow-text {
+            text-shadow: 0 0 10px rgba(74, 222, 128, 0.7);
+        }
+        
+        .search-input:focus {
+            box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.5);
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 100px;
+            width: 100%;
+        }
+        
+        .chart-tooltip {
+            background: rgba(15, 23, 42, 0.9) !important;
+            border: 1px solid rgba(74, 222, 128, 0.3) !important;
+            border-radius: 6px !important;
+            padding: 6px 10px !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-gray-100">
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
+            <div class="text-center md:text-left">
+                <h1 class="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-blue-500 glow-text">
+                    <i class="fas fa-chart-line mr-2"></i>Crypto Pulse
+                </h1>
+                <p class="text-gray-400 mt-2">Real-time cryptocurrency market dashboard</p>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4 w-full md:w-auto">
+                <div class="relative w-full sm:w-64">
+                    <input type="text" id="search" placeholder="Search coins..." 
+                           class="search-input w-full bg-gray-800/70 rounded-full py-2 px-4 pl-10 focus:outline-none focus:ring-0 border border-gray-700 focus:border-green-500 transition-all">
+                    <i class="fas fa-search absolute left-3 top-3 text-gray-500"></i>
+                </div>
+                <button id="connect-btn" class="w-full sm:w-auto bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 px-6 py-2 rounded-full flex items-center justify-center transition-all shadow-lg hover:shadow-green-500/20">
+                    <i class="fas fa-plug mr-2"></i>
+                    <span>Connect</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Featured Coins -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+            <div class="coin-card rounded-xl p-6 flex flex-col">
+                <div class="flex items-center mb-4">
+                    <img src="https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=025" alt="BTC" class="w-10 h-10 mr-3">
+                    <div>
+                        <h3 class="text-xl font-semibold">Bitcoin</h3>
+                        <p class="text-xs text-gray-400">BTC</p>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <p class="text-2xl font-bold mb-1" id="btc-price">$--.--</p>
+                    <p class="text-sm" id="btc-change">24h: --%</p>
+                </div>
+                <div class="chart-container mt-auto">
+                    <canvas id="btc-chart"></canvas>
+                </div>
+            </div>
+
+            <div class="coin-card rounded-xl p-6 flex flex-col">
+                <div class="flex items-center mb-4">
+                    <img src="https://cryptologos.cc/logos/ethereum-eth-logo.png?v=025" alt="ETH" class="w-10 h-10 mr-3">
+                    <div>
+                        <h3 class="text-xl font-semibold">Ethereum</h3>
+                        <p class="text-xs text-gray-400">ETH</p>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <p class="text-2xl font-bold mb-1" id="eth-price">$--.--</p>
+                    <p class="text-sm" id="eth-change">24h: --%</p>
+                </div>
+                <div class="chart-container mt-auto">
+                    <canvas id="eth-chart"></canvas>
+                </div>
+            </div>
+
+            <div class="coin-card rounded-xl p-6 flex flex-col">
+                <div class="flex items-center mb-4">
+                    <img src="https://cryptologos.cc/logos/bnb-bnb-logo.png?v=025" alt="BNB" class="w-10 h-10 mr-3">
+                    <div>
+                        <h3 class="text-xl font-semibold">BNB</h3>
+                        <p class="text-xs text-gray-400">BNB</p>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <p class="text-2xl font-bold mb-1" id="bnb-price">$--.--</p>
+                    <p class="text-sm" id="bnb-change">24h: --%</p>
+                </div>
+                <div class="chart-container mt-auto">
+                    <canvas id="bnb-chart"></canvas>
+                </div>
+            </div>
+
+            <div class="coin-card rounded-xl p-6 flex flex-col">
+                <div class="flex items-center mb-4">
+                    <img src="https://cryptologos.cc/logos/solana-sol-logo.png?v=025" alt="SOL" class="w-10 h-10 mr-3">
+                    <div>
+                        <h3 class="text-xl font-semibold">Solana</h3>
+                        <p class="text-xs text-gray-400">SOL</p>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <p class="text-2xl font-bold mb-1" id="sol-price">$--.--</p>
+                    <p class="text-sm" id="sol-change">24h: --%</p>
+                </div>
+                <div class="chart-container mt-auto">
+                    <canvas id="sol-chart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Market Table -->
+        <div class="bg-gray-800/50 rounded-xl p-6 backdrop-blur-sm border border-gray-700/50">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                <h2 class="text-2xl font-bold flex items-center">
+                    <i class="fas fa-table mr-3 text-green-500"></i>Market Overview
+                </h2>
+                <div class="flex space-x-2">
+                    <button class="filter-btn bg-green-600/30 px-4 py-2 rounded-lg transition-all" data-filter="all">All</button>
+                    <button class="filter-btn bg-gray-700/50 hover:bg-gray-600 px-4 py-2 rounded-lg transition-all" data-filter="gainers">Gainers</button>
+                    <button class="filter-btn bg-gray-700/50 hover:bg-gray-600 px-4 py-2 rounded-lg transition-all" data-filter="losers">Losers</button>
+                </div>
+            </div>
+            
+            <div class="market-table overflow-x-auto">
+                <table class="min-w-full">
+                    <thead>
+                        <tr class="text-gray-400 border-b border-gray-700">
+                            <th class="py-4 text-left pl-4">Coin</th>
+                            <th class="py-4 text-right">Price</th>
+                            <th class="py-4 text-right">24h Change</th>
+                            <th class="py-4 text-right">24h Volume</th>
+                            <th class="py-4 text-right pr-4">Market Cap</th>
+                        </tr>
+                    </thead>
+                    <tbody id="market-data">
+                        <tr>
+                            <td colspan="5" class="py-8 text-center text-gray-500">
+                                <div class="flex flex-col items-center">
+                                    <i class="fas fa-spinner fa-spin text-2xl mb-2 text-green-500"></i>
+                                    <span>Connecting to live data...</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-10 text-center text-gray-500 text-sm">
+            <div class="flex items-center justify-center space-x-4 mb-2">
+                <span id="connection-status" class="flex items-center">
+                    <span class="inline-block w-2 h-2 rounded-full bg-red-500 mr-2"></span>
+                    Status: Disconnected
+                </span>
+                <span id="last-updated" class="flex items-center">
+                    <i class="fas fa-clock mr-2"></i>
+                    Last updated: --
+                </span>
+            </div>
+            <p>Data provided by Binance WebSocket API. Updates in real-time.</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // WebSocket connection
+            let socket = null;
+            const connectBtn = document.getElementById('connect-btn');
+            const connectionStatus = document.getElementById('connection-status');
+            const lastUpdated = document.getElementById('last-updated');
+            
+            // Track previous prices to determine direction
+            const priceHistory = {
+                btc: null,
+                eth: null,
+                bnb: null,
+                sol: null
+            };
+            
+            // Price history for charts (last 20 updates)
+            const priceData = {
+                btc: [],
+                eth: [],
+                bnb: [],
+                sol: []
+            };
+            
+            // Chart instances
+            const charts = {
+                btc: null,
+                eth: null,
+                bnb: null,
+                sol: null
+            };
+            
+            // Initialize charts
+            function initCharts() {
+                const chartOptions = {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            enabled: true,
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                            borderColor: 'rgba(74, 222, 128, 0.3)',
+                            borderWidth: 1,
+                            padding: 10,
+                            cornerRadius: 6,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return `Price: $${context.parsed.y.toFixed(2)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { display: false },
+                        y: { display: false }
+                    },
+                    elements: {
+                        point: { radius: 0 },
+                        line: {
+                            borderWidth: 2,
+                            tension: 0.4
+                        }
+                    },
+                    animation: {
+                        duration: 0
+                    }
+                };
+                
+                // BTC Chart
+                const btcCtx = document.getElementById('btc-chart').getContext('2d');
+                charts.btc = new Chart(btcCtx, {
+                    type: 'line',
+                    data: {
+                        labels: Array(20).fill(''),
+                        datasets: [{
+                            data: Array(20).fill(0),
+                            borderColor: 'rgba(234, 179, 8, 1)',
+                            backgroundColor: 'rgba(234, 179, 8, 0.1)',
+                            fill: true
+                        }]
+                    },
+                    options: chartOptions
+                });
+                
+                // ETH Chart
+                const ethCtx = document.getElementById('eth-chart').getContext('2d');
+                charts.eth = new Chart(ethCtx, {
+                    type: 'line',
+                    data: {
+                        labels: Array(20).fill(''),
+                        datasets: [{
+                            data: Array(20).fill(0),
+                            borderColor: 'rgba(139, 92, 246, 1)',
+                            backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                            fill: true
+                        }]
+                    },
+                    options: chartOptions
+                });
+                
+                // BNB Chart
+                const bnbCtx = document.getElementById('bnb-chart').getContext('2d');
+                charts.bnb = new Chart(bnbCtx, {
+                    type: 'line',
+                    data: {
+                        labels: Array(20).fill(''),
+                        datasets: [{
+                            data: Array(20).fill(0),
+                            borderColor: 'rgba(20, 184, 166, 1)',
+                            backgroundColor: 'rgba(20, 184, 166, 0.1)',
+                            fill: true
+                        }]
+                    },
+                    options: chartOptions
+                });
+                
+                // SOL Chart
+                const solCtx = document.getElementById('sol-chart').getContext('2d');
+                charts.sol = new Chart(solCtx, {
+                    type: 'line',
+                    data: {
+                        labels: Array(20).fill(''),
+                        datasets: [{
+                            data: Array(20).fill(0),
+                            borderColor: 'rgba(236, 72, 153, 1)',
+                            backgroundColor: 'rgba(236, 72, 153, 0.1)',
+                            fill: true
+                        }]
+                    },
+                    options: chartOptions
+                });
+            }
+            
+            // Update chart data
+            function updateChart(coin, price) {
+                // Add new price to history (max 20 points)
+                priceData[coin].push(price);
+                if (priceData[coin].length > 20) {
+                    priceData[coin].shift();
+                }
+                
+                // Update chart
+                charts[coin].data.datasets[0].data = priceData[coin];
+                charts[coin].update();
+                
+                // Update chart color based on trend
+                if (priceData[coin].length > 1) {
+                    const lastPrice = priceData[coin][priceData[coin].length - 1];
+                    const prevPrice = priceData[coin][priceData[coin].length - 2];
+                    
+                    if (lastPrice > prevPrice) {
+                        charts[coin].data.datasets[0].borderColor = 'rgba(74, 222, 128, 1)';
+                        charts[coin].data.datasets[0].backgroundColor = 'rgba(74, 222, 128, 0.1)';
+                    } else if (lastPrice < prevPrice) {
+                        charts[coin].data.datasets[0].borderColor = 'rgba(248, 113, 113, 1)';
+                        charts[coin].data.datasets[0].backgroundColor = 'rgba(248, 113, 113, 0.1)';
+                    }
+                    
+                    charts[coin].update();
+                }
+            }
+            
+            // Market data for the table
+            const marketCoins = [
+                { symbol: 'BTCUSDT', name: 'Bitcoin', logo: 'bitcoin-btc' },
+                { symbol: 'ETHUSDT', name: 'Ethereum', logo: 'ethereum-eth' },
+                { symbol: 'BNBUSDT', name: 'BNB', logo: 'bnb-bnb' },
+                { symbol: 'SOLUSDT', name: 'Solana', logo: 'solana-sol' },
+                { symbol: 'XRPUSDT', name: 'XRP', logo: 'xrp-xrp' },
+                { symbol: 'ADAUSDT', name: 'Cardano', logo: 'cardano-ada' },
+                { symbol: 'DOGEUSDT', name: 'Dogecoin', logo: 'dogecoin-doge' },
+                { symbol: 'DOTUSDT', name: 'Polkadot', logo: 'polkadot-dot' },
+                { symbol: 'AVAXUSDT', name: 'Avalanche', logo: 'avalanche-avax' },
+                { symbol: 'MATICUSDT', name: 'Polygon', logo: 'polygon-matic' },
+                { symbol: 'LTCUSDT', name: 'Litecoin', logo: 'litecoin-ltc' },
+                { symbol: 'LINKUSDT', name: 'Chainlink', logo: 'chainlink-link' }
+            ];
+            
+            // Connect to WebSocket
+            function connectWebSocket() {
+                if (socket) {
+                    socket.close();
+                }
+                
+                // Show connecting state
+                connectionStatus.innerHTML = `<span class="inline-block w-2 h-2 rounded-full bg-yellow-500 mr-2"></span>Status: Connecting...`;
+                
+                socket = new WebSocket('wss://stream.binance.com:9443/ws/!ticker@arr');
+                
+                socket.onopen = function() {
+                    connectionStatus.innerHTML = `<span class="inline-block w-2 h-2 rounded-full bg-green-500 mr-2"></span>Status: Connected`;
+                    connectBtn.innerHTML = '<i class="fas fa-plug mr-2"></i><span>Disconnect</span>';
+                    connectBtn.className = 'w-full sm:w-auto bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 px-6 py-2 rounded-full flex items-center justify-center transition-all shadow-lg hover:shadow-red-500/20';
+                    
+                    // Update last updated time
+                    updateTimestamp();
+                };
+                
+                socket.onclose = function() {
+                    connectionStatus.innerHTML = `<span class="inline-block w-2 h-2 rounded-full bg-red-500 mr-2"></span>Status: Disconnected`;
+                    connectBtn.innerHTML = '<i class="fas fa-plug mr-2"></i><span>Connect</span>';
+                    connectBtn.className = 'w-full sm:w-auto bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 px-6 py-2 rounded-full flex items-center justify-center transition-all shadow-lg hover:shadow-green-500/20';
+                };
+                
+                socket.onmessage = function(event) {
+                    const data = JSON.parse(event.data);
+                    updateDashboard(data);
+                    updateTimestamp();
+                };
+                
+                socket.onerror = function(error) {
+                    console.error('WebSocket error:', error);
+                    connectionStatus.innerHTML = `<span class="inline-block w-2 h-2 rounded-full bg-red-500 mr-2"></span>Status: Error - try reconnecting`;
+                };
+            }
+            
+            // Update timestamp
+            function updateTimestamp() {
+                const now = new Date();
+                lastUpdated.innerHTML = `<i class="fas fa-clock mr-2"></i>Last updated: ${now.toLocaleTimeString()}`;
+            }
+            
+            // Update the dashboard with new data
+            function updateDashboard(data) {
+                // Update featured coins
+                updateFeaturedCoins(data);
+                
+                // Update market table
+                updateMarketTable(data);
+            }
+            
+            // Update the featured coins section
+            function updateFeaturedCoins(data) {
+                const featuredCoins = {
+                    'BTCUSDT': { element: 'btc', name: 'Bitcoin' },
+                    'ETHUSDT': { element: 'eth', name: 'Ethereum' },
+                    'BNBUSDT': { element: 'bnb', name: 'BNB' },
+                    'SOLUSDT': { element: 'sol', name: 'Solana' }
+                };
+                
+                data.forEach(coin => {
+                    if (featuredCoins[coin.s]) {
+                        const elementId = featuredCoins[coin.s].element;
+                        const priceElement = document.getElementById(`${elementId}-price`);
+                        const changeElement = document.getElementById(`${elementId}-change`);
+                        const card = priceElement.closest('.coin-card');
+                        
+                        // Format price
+                        const price = parseFloat(coin.c);
+                        const formattedPrice = price.toLocaleString('en-US', {
+                            style: 'currency',
+                            currency: 'USD',
+                            minimumFractionDigits: price < 1 ? 4 : 2
+                        });
+                        
+                        // Format 24h change
+                        const change = parseFloat(coin.P);
+                        const formattedChange = change.toFixed(2) + '%';
+                        
+                        // Update elements
+                        priceElement.textContent = formattedPrice;
+                        changeElement.textContent = `24h: ${formattedChange}`;
+                        
+                        // Set color based on change
+                        if (change > 0) {
+                            changeElement.className = 'text-sm text-green-500';
+                        } else if (change < 0) {
+                            changeElement.className = 'text-sm text-red-500';
+                        } else {
+                            changeElement.className = 'text-sm text-gray-400';
+                        }
+                        
+                        // Add animation if price changed direction
+                        if (priceHistory[elementId] !== null) {
+                            if (price > priceHistory[elementId]) {
+                                card.classList.remove('price-down');
+                                card.classList.add('price-up');
+                            } else if (price < priceHistory[elementId]) {
+                                card.classList.remove('price-up');
+                                card.classList.add('price-down');
+                            }
+                            
+                            // Remove animation after 1.5s
+                            setTimeout(() => {
+                                card.classList.remove('price-up', 'price-down');
+                            }, 1500);
+                        }
+                        
+                        // Update price history
+                        priceHistory[elementId] = price;
+                        
+                        // Update chart
+                        updateChart(elementId, price);
+                    }
+                });
+            }
+            
+            // Update the market table
+            function updateMarketTable(data) {
+                const tableBody = document.getElementById('market-data');
+                
+                // Filter data for our market coins
+                const filteredData = data.filter(coin => 
+                    marketCoins.some(mc => mc.symbol === coin.s)
+                );
+                
+                // Sort by market cap (descending)
+                filteredData.sort((a, b) => parseFloat(b.Q) - parseFloat(a.Q));
+                
+                // Clear existing rows (but keep the loading row if no data)
+                if (filteredData.length > 0) {
+                    tableBody.innerHTML = '';
+                }
+                
+                // Create table rows
+                filteredData.forEach(coin => {
+                    const marketCoin = marketCoins.find(mc => mc.symbol === coin.s);
+                    const row = document.createElement('tr');
+                    row.className = 'border-b border-gray-700 hover:bg-gray-700/30 transition-all';
+                    row.setAttribute('data-change', parseFloat(coin.P));
+                    
+                    // Format values
+                    const price = parseFloat(coin.c);
+                    const change = parseFloat(coin.P);
+                    const volume = parseFloat(coin.q);
+                    const marketCap = parseFloat(coin.Q);
+                    
+                    const formattedPrice = price.toLocaleString('en-US', {
+                        style: 'currency',
+                        currency: 'USD',
+                        minimumFractionDigits: price < 1 ? 4 : 2
+                    });
+                    
+                    const formattedChange = change >= 0 ? `+${change.toFixed(2)}%` : `${change.toFixed(2)}%`;
+                    const formattedVolume = volume.toLocaleString('en-US', {
+                        style: 'currency',
+                        currency: 'USD',
+                        maximumFractionDigits: 0
+                    });
+                    
+                    const formattedMarketCap = marketCap.toLocaleString('en-US', {
+                        style: 'currency',
+                        currency: 'USD',
+                        maximumFractionDigits: 0
+                    });
+                    
+                    // Determine change color and arrow
+                    const changeColor = change > 0 ? 'text-green-500' : change < 0 ? 'text-red-500' : 'text-gray-400';
+                    const changeArrow = change > 0 ? 'fa-arrow-up' : change < 0 ? 'fa-arrow-down' : 'fa-equals';
+                    
+                    // Create row HTML with fixed coin name display
+                    row.innerHTML = `
+                        <td class="py-4 pl-4">
+                            <div class="flex items-center min-w-[180px]">
+                                <div class="flex-shrink-0 w-6 h-6 mr-3">
+                                    <img src="https://cryptologos.cc/logos/${marketCoin.logo}-logo.png?v=025" 
+                                         alt="${marketCoin.name}" class="w-6 h-6">
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="font-medium truncate">${marketCoin.name}</div>
+                                    <div class="text-gray-500 text-xs">${coin.s.replace('USDT', '')}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-4 text-right font-medium">${formattedPrice}</td>
+                        <td class="py-4 text-right ${changeColor}">
+                            <i class="fas ${changeArrow} mr-1"></i>${formattedChange}
+                        </td>
+                        <td class="py-4 text-right text-gray-400">${formattedVolume}</td>
+                        <td class="py-4 text-right pr-4 font-medium">${formattedMarketCap}</td>
+                    `;
+                    
+                    tableBody.appendChild(row);
+                });
+                
+                // Apply any active filters after updating the table
+                applyActiveFilter();
+            }
+            
+            // Apply the currently active filter
+            function applyActiveFilter() {
+                const activeFilter = document.querySelector('.filter-btn.active')?.dataset.filter || 'all';
+                const rows = document.querySelectorAll('#market-data tr');
+                
+                rows.forEach(row => {
+                    if (activeFilter === 'all') {
+                        row.style.display = '';
+                    } else {
+                        const change = parseFloat(row.dataset.change);
+                        if ((activeFilter === 'gainers' && change > 0) || 
+                            (activeFilter === 'losers' && change < 0)) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    }
+                });
+            }
+            
+            // Connect/disconnect button handler
+            connectBtn.addEventListener('click', function() {
+                if (socket && socket.readyState === WebSocket.OPEN) {
+                    socket.close();
+                } else {
+                    connectWebSocket();
+                }
+            });
+            
+            // Search functionality
+            document.getElementById('search').addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                const rows = document.querySelectorAll('#market-data tr');
+                
+                rows.forEach(row => {
+                    const coinName = row.querySelector('td:first-child')?.textContent?.toLowerCase() || '';
+                    if (coinName.includes(searchTerm)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+            
+            // Filter buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Update active state
+                    document.querySelectorAll('.filter-btn').forEach(b => {
+                        b.classList.remove('active', 'bg-green-600/30');
+                        b.classList.add('bg-gray-700/50', 'hover:bg-gray-600');
+                    });
+                    this.classList.add('active', 'bg-green-600/30');
+                    this.classList.remove('bg-gray-700/50', 'hover:bg-gray-600');
+                    
+                    // Apply the filter
+                    applyActiveFilter();
+                });
+            });
+            
+            // Initialize charts
+            initCharts();
+            
+            // Initial connection
+            connectWebSocket();
+        });
+    </script>
+</body>
+</html>
