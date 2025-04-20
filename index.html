@@ -6,7 +6,8 @@
     <title>Crypto Pulse | Real-Time Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Updated Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         
@@ -117,7 +118,8 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
             <div class="coin-card rounded-xl p-6 flex flex-col">
                 <div class="flex items-center mb-4">
-                    <img src="https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=025" alt="BTC" class="w-10 h-10 mr-3">
+                    <!-- Fixed Bitcoin logo URL -->
+                    <img src="https://cryptoicons.org/api/icon/btc/200" alt="BTC" class="w-10 h-10 mr-3">
                     <div>
                         <h3 class="text-xl font-semibold">Bitcoin</h3>
                         <p class="text-xs text-gray-400">BTC</p>
@@ -134,7 +136,8 @@
 
             <div class="coin-card rounded-xl p-6 flex flex-col">
                 <div class="flex items-center mb-4">
-                    <img src="https://cryptologos.cc/logos/ethereum-eth-logo.png?v=025" alt="ETH" class="w-10 h-10 mr-3">
+                    <!-- Fixed Ethereum logo URL -->
+                    <img src="https://cryptoicons.org/api/icon/eth/200" alt="ETH" class="w-10 h-10 mr-3">
                     <div>
                         <h3 class="text-xl font-semibold">Ethereum</h3>
                         <p class="text-xs text-gray-400">ETH</p>
@@ -151,7 +154,8 @@
 
             <div class="coin-card rounded-xl p-6 flex flex-col">
                 <div class="flex items-center mb-4">
-                    <img src="https://cryptologos.cc/logos/bnb-bnb-logo.png?v=025" alt="BNB" class="w-10 h-10 mr-3">
+                    <!-- Fixed BNB logo URL -->
+                    <img src="https://cryptoicons.org/api/icon/bnb/200" alt="BNB" class="w-10 h-10 mr-3">
                     <div>
                         <h3 class="text-xl font-semibold">BNB</h3>
                         <p class="text-xs text-gray-400">BNB</p>
@@ -168,7 +172,8 @@
 
             <div class="coin-card rounded-xl p-6 flex flex-col">
                 <div class="flex items-center mb-4">
-                    <img src="https://cryptologos.cc/logos/solana-sol-logo.png?v=025" alt="SOL" class="w-10 h-10 mr-3">
+                    <!-- Fixed Solana logo URL -->
+                    <img src="https://cryptoicons.org/api/icon/sol/200" alt="SOL" class="w-10 h-10 mr-3">
                     <div>
                         <h3 class="text-xl font-semibold">Solana</h3>
                         <p class="text-xs text-gray-400">SOL</p>
@@ -406,19 +411,19 @@
             
             // Market data for the table
             const marketCoins = [
-                { symbol: 'BTCUSDT', name: 'Bitcoin', logo: 'bitcoin-btc' },
-                { symbol: 'ETHUSDT', name: 'Ethereum', logo: 'ethereum-eth' },
-                { symbol: 'BNBUSDT', name: 'BNB', logo: 'bnb-bnb' },
-                { symbol: 'SOLUSDT', name: 'Solana', logo: 'solana-sol' },
-                { symbol: 'XRPUSDT', name: 'XRP', logo: 'xrp-xrp' },
-                { symbol: 'ADAUSDT', name: 'Cardano', logo: 'cardano-ada' },
-                { symbol: 'DOGEUSDT', name: 'Dogecoin', logo: 'dogecoin-doge' },
-                { symbol: 'DOTUSDT', name: 'Polkadot', logo: 'polkadot-dot' },
-                { symbol: 'AVAXUSDT', name: 'Avalanche', logo: 'avalanche-avax' },
-                { symbol: 'MATICUSDT', name: 'Polygon', logo: 'polygon-matic' },
-                { symbol: 'LTCUSDT', name: 'Litecoin', logo: 'litecoin-ltc' },
-                { symbol: 'LINKUSDT', name: 'Chainlink', logo: 'chainlink-link' }
-            ];
+                { symbol: 'BTC', name: 'Bitcoin', logo: 'btc' },
+                { symbol: 'ETH', name: 'Ethereum', logo: 'eth' },
+                { symbol: 'BNB', name: 'BNB', logo: 'bnb' },
+                { symbol: 'SOL', name: 'Solana', logo: 'sol' },
+                { symbol: 'XRP', name: 'XRP', logo: 'xrp' },
+                { symbol: 'ADA', name: 'Cardano', logo: 'ada' },
+                { symbol: 'DOGE', name: 'Dogecoin', logo: 'doge' },
+                { symbol: 'DOT', name: 'Polkadot', logo: 'dot' },
+                { symbol: 'AVAX', name: 'Avalanche', logo: 'avax' },
+                { symbol: 'MATIC', name: 'Polygon', logo: 'matic' },
+                { symbol: 'LTC', name: 'Litecoin', logo: 'ltc' },
+                { symbol: 'LINK', name: 'Chainlink', logo: 'link' }
+            ];         
             
             // Connect to WebSocket
             function connectWebSocket() {
@@ -539,70 +544,60 @@
                 });
             }
             
-            // Update the market table
             function updateMarketTable(data) {
                 const tableBody = document.getElementById('market-data');
                 
-                // Filter data for our market coins
-                const filteredData = data.filter(coin => 
-                    marketCoins.some(mc => mc.symbol === coin.s)
-                );
-                
-                // Sort by market cap (descending)
-                filteredData.sort((a, b) => parseFloat(b.Q) - parseFloat(a.Q));
-                
-                // Clear existing rows (but keep the loading row if no data)
-                if (filteredData.length > 0) {
+                // Clear existing rows but keep loading message if no data
+                if (data.length > 0) {
                     tableBody.innerHTML = '';
                 }
-                
-                // Create table rows
-                filteredData.forEach(coin => {
-                    const marketCoin = marketCoins.find(mc => mc.symbol === coin.s);
+            
+                // Create table rows using only our marketCoins data
+                marketCoins.forEach(marketCoin => {
+                    // Find matching WebSocket data (symbol + 'USDT')
+                    const coinData = data.find(coin => coin.s === `${marketCoin.symbol}USDT`);
+                    if (!coinData) return;
+            
                     const row = document.createElement('tr');
                     row.className = 'border-b border-gray-700 hover:bg-gray-700/30 transition-all';
-                    row.setAttribute('data-change', parseFloat(coin.P));
-                    
+                    row.setAttribute('data-change', parseFloat(coinData.P));
+            
                     // Format values
-                    const price = parseFloat(coin.c);
-                    const change = parseFloat(coin.P);
-                    const volume = parseFloat(coin.q);
-                    const marketCap = parseFloat(coin.Q);
-                    
+                    const price = parseFloat(coinData.c);
+                    const change = parseFloat(coinData.P);
+                    const volume = parseFloat(coinData.q);
+                    const marketCap = parseFloat(coinData.Q);
+            
                     const formattedPrice = price.toLocaleString('en-US', {
                         style: 'currency',
                         currency: 'USD',
                         minimumFractionDigits: price < 1 ? 4 : 2
                     });
-                    
+            
                     const formattedChange = change >= 0 ? `+${change.toFixed(2)}%` : `${change.toFixed(2)}%`;
                     const formattedVolume = volume.toLocaleString('en-US', {
                         style: 'currency',
                         currency: 'USD',
                         maximumFractionDigits: 0
                     });
-                    
+            
                     const formattedMarketCap = marketCap.toLocaleString('en-US', {
                         style: 'currency',
                         currency: 'USD',
                         maximumFractionDigits: 0
                     });
-                    
-                    // Determine change color and arrow
+            
                     const changeColor = change > 0 ? 'text-green-500' : change < 0 ? 'text-red-500' : 'text-gray-400';
                     const changeArrow = change > 0 ? 'fa-arrow-up' : change < 0 ? 'fa-arrow-down' : 'fa-equals';
-                    
-                    // Create row HTML with fixed coin name display
+            
                     row.innerHTML = `
                         <td class="py-4 pl-4">
-                            <div class="flex items-center min-w-[180px]">
-                                <div class="flex-shrink-0 w-6 h-6 mr-3">
-                                    <img src="https://cryptologos.cc/logos/${marketCoin.logo}-logo.png?v=025" 
-                                         alt="${marketCoin.name}" class="w-6 h-6">
-                                </div>
-                                <div class="min-w-0">
-                                    <div class="font-medium truncate">${marketCoin.name}</div>
-                                    <div class="text-gray-500 text-xs">${coin.s.replace('USDT', '')}</div>
+                            <div class="flex items-center">
+                                <img src="https://cryptoicons.org/api/icon/${marketCoin.logo}/200" 
+                                     alt="${marketCoin.name}" class="w-6 h-6 mr-3">
+                                <div>
+                                    <div class="font-medium">${marketCoin.name}</div>
+                                    <div class="text-gray-500 text-xs">${marketCoin.symbol}</div>
                                 </div>
                             </div>
                         </td>
@@ -613,10 +608,10 @@
                         <td class="py-4 text-right text-gray-400">${formattedVolume}</td>
                         <td class="py-4 text-right pr-4 font-medium">${formattedMarketCap}</td>
                     `;
-                    
+            
                     tableBody.appendChild(row);
                 });
-                
+            
                 // Apply any active filters after updating the table
                 applyActiveFilter();
             }
