@@ -6,7 +6,7 @@
     <title>Crypto Pulse | Real-Time Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Updated Font Awesome CDN -->
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -118,7 +118,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
             <div class="coin-card rounded-xl p-6 flex flex-col">
                 <div class="flex items-center mb-4">
-                    <!-- Fixed Bitcoin logo URL -->
+
                     <img src="https://cryptoicons.org/api/icon/btc/200" alt="BTC" class="w-10 h-10 mr-3">
                     <div>
                         <h3 class="text-xl font-semibold">Bitcoin</h3>
@@ -136,7 +136,7 @@
 
             <div class="coin-card rounded-xl p-6 flex flex-col">
                 <div class="flex items-center mb-4">
-                    <!-- Fixed Ethereum logo URL -->
+           
                     <img src="https://cryptoicons.org/api/icon/eth/200" alt="ETH" class="w-10 h-10 mr-3">
                     <div>
                         <h3 class="text-xl font-semibold">Ethereum</h3>
@@ -154,8 +154,7 @@
 
             <div class="coin-card rounded-xl p-6 flex flex-col">
                 <div class="flex items-center mb-4">
-                    <!-- Fixed BNB logo URL -->
-                    <img src="https://cryptoicons.org/api/icon/bnb/200" alt="BNB" class="w-10 h-10 mr-3">
+                         <img src="https://cryptoicons.org/api/icon/bnb/200" alt="BNB" class="w-10 h-10 mr-3">
                     <div>
                         <h3 class="text-xl font-semibold">BNB</h3>
                         <p class="text-xs text-gray-400">BNB</p>
@@ -172,7 +171,7 @@
 
             <div class="coin-card rounded-xl p-6 flex flex-col">
                 <div class="flex items-center mb-4">
-                    <!-- Fixed Solana logo URL -->
+                  
                     <img src="https://cryptoicons.org/api/icon/sol/200" alt="SOL" class="w-10 h-10 mr-3">
                     <div>
                         <h3 class="text-xl font-semibold">Solana</h3>
@@ -251,7 +250,6 @@
             const connectionStatus = document.getElementById('connection-status');
             const lastUpdated = document.getElementById('last-updated');
             
-            // Track previous prices to determine direction
             const priceHistory = {
                 btc: null,
                 eth: null,
@@ -259,7 +257,6 @@
                 sol: null
             };
             
-            // Price history for charts (last 20 updates)
             const priceData = {
                 btc: [],
                 eth: [],
@@ -267,15 +264,12 @@
                 sol: []
             };
             
-            // Chart instances
             const charts = {
                 btc: null,
                 eth: null,
                 bnb: null,
                 sol: null
             };
-            
-            // Initialize charts
             function initCharts() {
                 const chartOptions = {
                     responsive: true,
@@ -315,7 +309,6 @@
                     }
                 };
                 
-                // BTC Chart
                 const btcCtx = document.getElementById('btc-chart').getContext('2d');
                 charts.btc = new Chart(btcCtx, {
                     type: 'line',
@@ -331,7 +324,6 @@
                     options: chartOptions
                 });
                 
-                // ETH Chart
                 const ethCtx = document.getElementById('eth-chart').getContext('2d');
                 charts.eth = new Chart(ethCtx, {
                     type: 'line',
@@ -347,7 +339,6 @@
                     options: chartOptions
                 });
                 
-                // BNB Chart
                 const bnbCtx = document.getElementById('bnb-chart').getContext('2d');
                 charts.bnb = new Chart(bnbCtx, {
                     type: 'line',
@@ -363,7 +354,6 @@
                     options: chartOptions
                 });
                 
-                // SOL Chart
                 const solCtx = document.getElementById('sol-chart').getContext('2d');
                 charts.sol = new Chart(solCtx, {
                     type: 'line',
@@ -380,19 +370,15 @@
                 });
             }
             
-            // Update chart data
             function updateChart(coin, price) {
-                // Add new price to history (max 20 points)
                 priceData[coin].push(price);
                 if (priceData[coin].length > 20) {
                     priceData[coin].shift();
                 }
                 
-                // Update chart
                 charts[coin].data.datasets[0].data = priceData[coin];
                 charts[coin].update();
                 
-                // Update chart color based on trend
                 if (priceData[coin].length > 1) {
                     const lastPrice = priceData[coin][priceData[coin].length - 1];
                     const prevPrice = priceData[coin][priceData[coin].length - 2];
@@ -408,8 +394,6 @@
                     charts[coin].update();
                 }
             }
-            
-            // Market data for the table
             const marketCoins = [
                 { symbol: 'BTC', name: 'Bitcoin', logo: 'btc' },
                 { symbol: 'ETH', name: 'Ethereum', logo: 'eth' },
@@ -425,13 +409,10 @@
                 { symbol: 'LINK', name: 'Chainlink', logo: 'link' }
             ];         
             
-            // Connect to WebSocket
             function connectWebSocket() {
                 if (socket) {
                     socket.close();
                 }
-                
-                // Show connecting state
                 connectionStatus.innerHTML = `<span class="inline-block w-2 h-2 rounded-full bg-yellow-500 mr-2"></span>Status: Connecting...`;
                 
                 socket = new WebSocket('wss://stream.binance.com:9443/ws/!ticker@arr');
@@ -441,7 +422,6 @@
                     connectBtn.innerHTML = '<i class="fas fa-plug mr-2"></i><span>Disconnect</span>';
                     connectBtn.className = 'w-full sm:w-auto bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 px-6 py-2 rounded-full flex items-center justify-center transition-all shadow-lg hover:shadow-red-500/20';
                     
-                    // Update last updated time
                     updateTimestamp();
                 };
                 
@@ -463,22 +443,18 @@
                 };
             }
             
-            // Update timestamp
             function updateTimestamp() {
                 const now = new Date();
                 lastUpdated.innerHTML = `<i class="fas fa-clock mr-2"></i>Last updated: ${now.toLocaleTimeString()}`;
             }
             
-            // Update the dashboard with new data
             function updateDashboard(data) {
-                // Update featured coins
+            
                 updateFeaturedCoins(data);
                 
-                // Update market table
                 updateMarketTable(data);
             }
             
-            // Update the featured coins section
             function updateFeaturedCoins(data) {
                 const featuredCoins = {
                     'BTCUSDT': { element: 'btc', name: 'Bitcoin' },
@@ -502,15 +478,12 @@
                             minimumFractionDigits: price < 1 ? 4 : 2
                         });
                         
-                        // Format 24h change
                         const change = parseFloat(coin.P);
                         const formattedChange = change.toFixed(2) + '%';
                         
-                        // Update elements
                         priceElement.textContent = formattedPrice;
                         changeElement.textContent = `24h: ${formattedChange}`;
                         
-                        // Set color based on change
                         if (change > 0) {
                             changeElement.className = 'text-sm text-green-500';
                         } else if (change < 0) {
@@ -519,7 +492,6 @@
                             changeElement.className = 'text-sm text-gray-400';
                         }
                         
-                        // Add animation if price changed direction
                         if (priceHistory[elementId] !== null) {
                             if (price > priceHistory[elementId]) {
                                 card.classList.remove('price-down');
@@ -528,17 +500,13 @@
                                 card.classList.remove('price-up');
                                 card.classList.add('price-down');
                             }
-                            
-                            // Remove animation after 1.5s
                             setTimeout(() => {
                                 card.classList.remove('price-up', 'price-down');
                             }, 1500);
                         }
                         
-                        // Update price history
                         priceHistory[elementId] = price;
                         
-                        // Update chart
                         updateChart(elementId, price);
                     }
                 });
@@ -547,14 +515,11 @@
             function updateMarketTable(data) {
                 const tableBody = document.getElementById('market-data');
                 
-                // Clear existing rows but keep loading message if no data
                 if (data.length > 0) {
                     tableBody.innerHTML = '';
                 }
             
-                // Create table rows using only our marketCoins data
                 marketCoins.forEach(marketCoin => {
-                    // Find matching WebSocket data (symbol + 'USDT')
                     const coinData = data.find(coin => coin.s === `${marketCoin.symbol}USDT`);
                     if (!coinData) return;
             
@@ -562,7 +527,6 @@
                     row.className = 'border-b border-gray-700 hover:bg-gray-700/30 transition-all';
                     row.setAttribute('data-change', parseFloat(coinData.P));
             
-                    // Format values
                     const price = parseFloat(coinData.c);
                     const change = parseFloat(coinData.P);
                     const volume = parseFloat(coinData.q);
@@ -612,11 +576,9 @@
                     tableBody.appendChild(row);
                 });
             
-                // Apply any active filters after updating the table
                 applyActiveFilter();
             }
             
-            // Apply the currently active filter
             function applyActiveFilter() {
                 const activeFilter = document.querySelector('.filter-btn.active')?.dataset.filter || 'all';
                 const rows = document.querySelectorAll('#market-data tr');
@@ -636,7 +598,6 @@
                 });
             }
             
-            // Connect/disconnect button handler
             connectBtn.addEventListener('click', function() {
                 if (socket && socket.readyState === WebSocket.OPEN) {
                     socket.close();
@@ -645,7 +606,6 @@
                 }
             });
             
-            // Search functionality
             document.getElementById('search').addEventListener('input', function(e) {
                 const searchTerm = e.target.value.toLowerCase();
                 const rows = document.querySelectorAll('#market-data tr');
@@ -660,10 +620,9 @@
                 });
             });
             
-            // Filter buttons
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    // Update active state
+                 
                     document.querySelectorAll('.filter-btn').forEach(b => {
                         b.classList.remove('active', 'bg-green-600/30');
                         b.classList.add('bg-gray-700/50', 'hover:bg-gray-600');
@@ -671,15 +630,11 @@
                     this.classList.add('active', 'bg-green-600/30');
                     this.classList.remove('bg-gray-700/50', 'hover:bg-gray-600');
                     
-                    // Apply the filter
+                 
                     applyActiveFilter();
                 });
             });
-            
-            // Initialize charts
             initCharts();
-            
-            // Initial connection
             connectWebSocket();
         });
     </script>
