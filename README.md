@@ -12,7 +12,7 @@ Crypto Pulse is a modern, real-time cryptocurrency dashboard that provides live 
 - **Responsive Design**: Works on desktop and mobile devices.
 - **Visual Indicators**: Color-coded price changes and animations.
 
-## Technologies Used
+## Technologies Used-
 - **Frontend**: HTML5, CSS3, JavaScript
 - **UI Framework**: Tailwind CSS
 - **Charts**: Chart.js
